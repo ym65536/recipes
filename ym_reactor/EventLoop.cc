@@ -1,22 +1,21 @@
 #include "EventLoop.h"
+#include "EPoller.h"
+#include <Channel.h>
 #include "logging/Logging.h"
 #include <assert.h>
 
 using namespace muduo;
 
 __thread EventLoop* t_current_loop = nullptr;
+const static int EPOLL_TIMEOUT_MS = 2 * 1000;
 
 EventLoop::EventLoop() :
   thread_id_(CurrentThread::tid()) {
-  epoll_fd_ = epoll_create(EPOLL_FD_SIZE);
-  if (epoll_fd_ < 0) {
-    LOG_FATAL << "create epoll fail.";
-  }
   t_current_loop = this;
+  epoller_.reset(new EPoller(this));
 }
 
 EventLoop::~EventLoop() {
-  ::close(epoll_fd_);
   assert(!looping_);
   t_current_loop = nullptr;
 }
@@ -35,9 +34,27 @@ void EventLoop::loop() {
 
   looping_ = true;
   
-  epoll_wait(epoll_fd_, nullptr, EPOLL_FD_SIZE, 5 * 1000);
+  while (!quit_) {
+    active_channels_.clear();
+    LOG_DEBUG << "Go to poll at time " << Timestamp::now().toString();
+    epoller_->poll(EPOLL_TIMEOUT_MS, active_channels_);
+    for (auto channel : active_channels_) {
+      channel->handleEvent();
+    }
+  }
 
   LOG_DEBUG << "EventLoop=" << t_current_loop << " stop loop.";
   looping_ = false;
+}
+
+void EventLoop::quit() {
+  quit_ = false;
+  //wakeup();
+}
+
+void EventLoop::updateChannel(Channel* channel) {
+  assert(channel->ownerLoop() == this);
+  assertInLoopThread();
+  epoller_->updateChannel(channel);
 }
 
