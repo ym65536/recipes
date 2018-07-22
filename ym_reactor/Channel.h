@@ -1,6 +1,7 @@
 #ifndef MUDUO_NET_CHANNEL_H
 #define MUDUO_NET_CHANNEL_H
 
+#include "logging/Logging.h"
 #include "thread/Thread.h"
 #include <sys/epoll.h>
 #include <string>
@@ -55,6 +56,7 @@ class Channel {
   void enableReading() {
     events_ |= READ_EVENT | EPOLLET; // edge trigger?
 //events_ |= READ_EVENT  // level trigger?
+    LOG_INFO << "Read event=" << events_;
     updateChannel();
   }
   

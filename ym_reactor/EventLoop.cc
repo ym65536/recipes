@@ -1,18 +1,20 @@
 #include "EventLoop.h"
 #include "EPoller.h"
 #include <Channel.h>
+#include <TimerQueue.h>
 #include "logging/Logging.h"
 #include <assert.h>
 
 using namespace muduo;
 
 __thread EventLoop* t_current_loop = nullptr;
-const static int EPOLL_TIMEOUT_MS = 2 * 1000;
+const static int EPOLL_TIMEOUT_MS = 5 * 1000;
 
 EventLoop::EventLoop() :
   thread_id_(CurrentThread::tid()) {
   t_current_loop = this;
   epoller_.reset(new EPoller(this));
+  timer_queue_.reset(new TimerQueue(this));
 }
 
 EventLoop::~EventLoop() {
@@ -48,7 +50,8 @@ void EventLoop::loop() {
 }
 
 void EventLoop::quit() {
-  quit_ = false;
+  quit_ = true;
+  LOG_INFO << "reset quit = " << quit_;
   //wakeup();
 }
 
@@ -56,5 +59,20 @@ void EventLoop::updateChannel(Channel* channel) {
   assert(channel->ownerLoop() == this);
   assertInLoopThread();
   epoller_->updateChannel(channel);
+}
+
+TimerId EventLoop::runAt(const Timestamp& when, const TimeoutCallback& cb) {
+  return timer_queue_->addTimer(cb, when, 0.0);
+}
+
+TimerId EventLoop::runAfter(double interval, const TimeoutCallback& cb) {
+  Timestamp when = addTime(Timestamp::now(), interval);
+  LOG_DEBUG << "when = " << when.toString();
+  return runAt(when, cb);
+}
+
+TimerId EventLoop::runEvery(double interval, const TimeoutCallback& cb) {
+  Timestamp when = addTime(Timestamp::now(), interval);
+  return timer_queue_->addTimer(cb, when, interval);
 }
 

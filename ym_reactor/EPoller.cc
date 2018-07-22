@@ -63,6 +63,7 @@ void EPoller::updateChannel(Channel* channel) {
     assert(channels_[fd] == channel);
     update(EPOLL_CTL_MOD, channel);
   }
+  LOG_DEBUG << "channels size = " << channels_.size();
 }
 
 void EPoller::update(int opt, Channel* channel) {
