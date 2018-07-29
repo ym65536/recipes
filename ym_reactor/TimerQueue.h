@@ -24,7 +24,8 @@ class TimerQueue {
   typedef std::shared_ptr<Timer> TimerPtr;
   typedef std::pair<Timestamp, TimerPtr> TimerEntry;
   typedef std::set<TimerEntry> TimerList;
-
+  
+  void addTimerInLoop(const TimerPtr& timer);
   void handleRead();
   void getExpiredTimer(const Timestamp& now, std::vector<TimerEntry>&);
   

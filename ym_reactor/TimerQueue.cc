@@ -49,7 +49,6 @@ void resetTimerFd(int timer_fd, const Timestamp& when) {
   }
 }
 
-
 TimerQueue::TimerQueue(EventLoop* loop) :
   loop_(loop), timerfd_(createTimerFd()),
   timer_channel_(loop_, timerfd_) {
@@ -58,19 +57,21 @@ TimerQueue::TimerQueue(EventLoop* loop) :
 }
 
 TimerQueue::~TimerQueue() {
-
 }
 
 TimerId TimerQueue::addTimer(const TimeoutCallback& cb, const Timestamp& when, 
     double interval) {
-  loop_->assertInLoopThread();
   TimerPtr timer = make_shared<Timer>(cb, when, interval);
+  loop_->runInLoop(std::bind(&TimerQueue::addTimerInLoop, this, timer));
+  return timer.get();
+}
+
+void TimerQueue::addTimerInLoop(const TimerPtr& timer) {
+  loop_->assertInLoopThread();
   bool early = insertTimer(timer);
   if (early) {
     resetTimerFd(timerfd_, timer->when());
   }
-
-  return timer.get();
 }
 
 bool TimerQueue::insertTimer(const TimerPtr& timer) {

@@ -10,6 +10,8 @@ typedef std::function<void ()> TimeoutCallback;
 
 typedef std::function<void()> EventCallback;
 
+typedef std::function<void()> Functor;
+
 
 };
 
