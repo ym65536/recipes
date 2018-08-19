@@ -12,19 +12,12 @@ class InetAddress;
 class Socket {
  public:
   explicit Socket(int fd);
-  : sockfd_(fd) {
-  }
   Socket();
-  {
-
-  }
   ~Socket();
-  {
-  }
 
   void Bind(const InetAddress& addr);
   void Listen();
-  void Accept();
+  int Accept(InetAddress& peeraddr);
   void ReuseAddr(bool on);
 
   int sockfd() const { return sockfd_; }

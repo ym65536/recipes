@@ -3,6 +3,7 @@
 
 #include <string>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 namespace muduo {
 
@@ -32,10 +33,12 @@ inline uint16_t networkToHost16(uint16_t net16) {
 
 class InetAddress {
  public:
-  InetAddress(const string& ip, int port);
+  InetAddress() {
+  }
+  InetAddress(const std::string& ip, int port);
   ~InetAddress();
 
-  std::string toHostPort() const;
+  std::string to_host_port() const;
 
   const struct sockaddr_in& GetSockAddrInet() const { return addr_; }
   void SetSockAddrInet(const struct sockaddr_in& addr) { addr_ = addr; }
@@ -47,9 +50,9 @@ class InetAddress {
 namespace sockets {
 
 int Socket(); 
-void Bind(int sockfd, const struct sockaddr_in& addr ); 
+void Bind(int sockfd, const struct sockaddr_in& addr); 
 void Listen(int sockfd); 
-void Accept(int sockfd, struct sockaddr_in& addr); 
+int Accept(int sockfd, struct sockaddr_in& addr); 
 void Close(int sockfd); 
 }
 

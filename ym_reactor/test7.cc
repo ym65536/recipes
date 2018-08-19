@@ -1,8 +1,7 @@
-#include "Acceptor.h"
-#include "EventLoop.h"
-#include "InetAddress.h"
-#include "SocketsOps.h"
 #include <iostream>
+#include "acceptor.h"
+#include "EventLoop.h"
+#include "inet_address.h"
 
 using namespace std;
 using namespace muduo;
@@ -10,7 +9,7 @@ using namespace muduo;
 void OnConnection(int sockfd, const InetAddress& peerAddr)
 {
   printf("newConnection(): accepted a new connection from %s\n",
-         peerAddr.toHostPort().c_str());
+         peerAddr.to_host_port().c_str());
   ::write(sockfd, "How are you?\n", 13);
   sockets::Close(sockfd);
 }

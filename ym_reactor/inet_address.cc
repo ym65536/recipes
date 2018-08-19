@@ -1,14 +1,17 @@
-#include "InetSocket.h"
+#include "inet_address.h"
 #include <errno.h>
 #include <fcntl.h>
+#include "logging/Logging.h"
 
 using namespace muduo;
 using namespace std;
 
+const static int BACKLOG = 32;
+
 InetAddress::InetAddress(const std::string& ip, int port) {
   addr_.sin_family = AF_INET;
   addr_.sin_port = hostToNetwork16(port);
-  if (::inet_pton(AF_INET, ip, &(addr_.sin_addr)) <= 0)
+  if (::inet_pton(AF_INET, ip.c_str(), &(addr_.sin_addr)) <= 0)
   {
     LOG_SYSERR << "sockets::fromHostPort";
   }
@@ -17,11 +20,13 @@ InetAddress::InetAddress(const std::string& ip, int port) {
 InetAddress::~InetAddress() {
 }
 
-string InetAddress::toHostPort() {
+std::string InetAddress::to_host_port() const {
   char host[INET_ADDRSTRLEN] = "INVALID";
-  ::inet_ntop(AF_INET, &addr_.sin_addr, host, sizeof host);
+  char buf[100] = {0};
+  sockaddr_in addr = addr_;
+  ::inet_ntop(AF_INET, &addr.sin_addr, host, sizeof host);
   uint16_t port = networkToHost16(addr.sin_port);
-  snprintf(buf, size, "%s:%u", host, port);
+  snprintf(buf, 100, "%s:%u", host, port);
 
   return string(buf);
 }
@@ -43,15 +48,15 @@ void sockets::Bind(int sockfd, const struct sockaddr_in& addr ) {
 }
 
 void sockets::Listen(int sockfd) {
-  int ret = listen(fd, BACKLOG);
+  int ret = listen(sockfd, BACKLOG);
   if (ret < 0) {
     LOG_SYSFATAL << "Listen";
   }
 }
 
-void sockets::Accept(int sockfd, struct sockaddr_in& addr) {
+int sockets::Accept(int sockfd, struct sockaddr_in& addr) {
   socklen_t addrlen = sizeof(addr);
-  int connfd = accept4(sockfd, (struct sockaddr* )&addr, sizeof(addr), 
+  int connfd = accept4(sockfd, (struct sockaddr* )&addr, &addrlen, 
       SOCK_NONBLOCK | SOCK_CLOEXEC);
   if (connfd < 0) {
     LOG_SYSERR << "accept";

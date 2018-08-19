@@ -3,7 +3,9 @@
 
 #include <datetime/Timestamp.h>
 #include <Channel.h>
-#include "InetAddress.h"
+#include "inet_address.h"
+#include "socket.h"
+#include "Callbacks.h"
 
 namespace muduo {
 
@@ -18,16 +20,18 @@ class Acceptor {
     cb_ = cb;
   }
 
-  bool Listenning() const { return listenning_; }
+  void Listen();
+
+  bool is_listenning() const { return listenning_; }
 
  private:
-  void handleRead();
+  void HandleRead();
 
   EventLoop* loop_;
   Socket socket_;
-  Channel acceptor_channel_;
+  Channel accept_channel_;
   NewConnectionCallback cb_;
-  bool listennig_;
+  bool listenning_ = false;
 };
 
 };

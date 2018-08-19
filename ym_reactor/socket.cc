@@ -1,8 +1,9 @@
 #include "socket.h"
-#include "InetAddress.h"
+#include "inet_address.h"
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <strings.h>  // bzero
+#include "logging/Logging.h"
 
 using namespace muduo;
 
@@ -10,7 +11,6 @@ Socket::Socket(int fd): sockfd_(fd) {
 }
 
 Socket::Socket(): sockfd_(sockets::Socket()) {
-
 }
 
 Socket::~Socket() {
@@ -18,19 +18,19 @@ Socket::~Socket() {
 }
 
 void Socket::Bind(const InetAddress& addr) {
-  sockets::Bind(sockfd_, addr.getSockAddrInet());
+  sockets::Bind(sockfd_, addr.GetSockAddrInet());
 }
 
 void Socket::Listen() {
   sockets::Listen(sockfd_);
 }
 
-int Socket::Accept(InetAddress* peeraddr) {
+int Socket::Accept(InetAddress& peeraddr) {
   struct sockaddr_in addr;
   bzero(&addr, sizeof addr);
-  int connfd = sockets::Accept(sockfd_, &addr);
+  int connfd = sockets::Accept(sockfd_, addr);
   if (connfd >= 0) {
-    peeraddr->SetSockAddrInet(addr);
+    peeraddr.SetSockAddrInet(addr);
   }
   return connfd;
 }
