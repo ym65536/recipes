@@ -24,11 +24,11 @@ void TcpServer::Start() {
   if (!start_) {
     start_ = true;
   }
-  loop_->runInLoop(std::bind(&Acceptor::Listen, acceptor_.get()));
+  loop_->RunInLoop(std::bind(&Acceptor::Listen, acceptor_.get()));
 }
 
 void TcpServer::NewConnection(int sockfd, const InetAddress& peer_addr) {
-  loop_->assertInLoopThread();
+  loop_->AssertInLoopThread();
   ++ conn_id_;
   std::string conn_name = conn_name_ + std::to_string(conn_id_);
   LOG_DEBUG << "Get new conneciton=" << conn_name << 

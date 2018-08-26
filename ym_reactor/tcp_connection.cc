@@ -19,7 +19,7 @@ TcpConnection::TcpConnection(EventLoop* loop,
     state_(kConnecting) {
   LOG_DEBUG << "Tcp Connection[name=" << conn_name_ << ", fd=" << sockfd 
     << ", peer=" << peer_addr_.ToHostPort();
-  channel_->setReadCallback(std::bind(&TcpConnection::HandleRead, this));
+  channel_->SetReadCallback(std::bind(&TcpConnection::HandleRead, this));
 }
 
 TcpConnection::~TcpConnection() {
@@ -28,10 +28,10 @@ TcpConnection::~TcpConnection() {
 }
 
 void TcpConnection::Connect() {
-  loop_->assertInLoopThread();
+  loop_->AssertInLoopThread();
   assert(state_ == kConnecting);
   SetState(kConnected);
-  channel_->enableReading();
+  channel_->EnableReading();
 }
 
 void TcpConnection::HandleRead() {

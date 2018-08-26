@@ -22,11 +22,11 @@ class EventLoop {
   ~EventLoop();
 
   void loop();
-  void updateChannel(Channel* channel);
+  void UpdateChannel(Channel* channel);
 
   void quit();
 
-  void assertInLoopThread() {
+  void AssertInLoopThread() {
     if (!isInLoopThread()) {
       abortInLoop("Not in loop thread");
     }
@@ -39,15 +39,15 @@ class EventLoop {
   void abortInLoop(const std::string&);
   EventLoop* getCurrentLoop();
 
-  void runInLoop(const Functor&);
+  void RunInLoop(const Functor&);
   void doPendingFunctors();
 
-  void handleRead();
+  void HandleRead();
   void wakeup();
 
-  TimerId runAt(const Timestamp& when, const TimeoutCallback& cb);
-  TimerId runAfter(double interval, const TimeoutCallback& cb);
-  TimerId runEvery(double interval, const TimeoutCallback& cb);
+  TimerId RunAt(const Timestamp& when, const TimeoutCallback& cb);
+  TimerId RunAfter(double interval, const TimeoutCallback& cb);
+  TimerId RunEvery(double interval, const TimeoutCallback& cb);
 
  private:
   typedef std::vector<Channel*> ChannelList;

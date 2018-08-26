@@ -22,11 +22,11 @@ class EPoller {
   Timestamp poll(int timeoutMs, ChannelList& active_channels);
   void fillActiveChannels(int nevents, ChannelList& active_channels);
 
-  void updateChannel(Channel* channel);
+  void UpdateChannel(Channel* channel);
   void update(int opt, Channel* channel);
 
-  void assertInLoopThread() {
-    loop_->assertInLoopThread();
+  void AssertInLoopThread() {
+    loop_->AssertInLoopThread();
   }
 
  private:

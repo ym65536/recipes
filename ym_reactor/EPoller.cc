@@ -53,8 +53,8 @@ void EPoller::fillActiveChannels(int nevents, ChannelList& active_channels) {
   }
 }
 
-void EPoller::updateChannel(Channel* channel) {
-  assertInLoopThread();
+void EPoller::UpdateChannel(Channel* channel) {
+  AssertInLoopThread();
   int fd = channel->fd();
   if (channels_.find(fd) == channels_.end()) {
     channels_[fd] = channel;

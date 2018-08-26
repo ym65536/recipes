@@ -14,7 +14,7 @@ Acceptor::Acceptor(EventLoop* loop, const InetAddress& addr) :
   listenning_(false) {
   socket_.ReuseAddr(true);
   socket_.Bind(addr);
-  accept_channel_.setReadCallback(std::bind(&Acceptor::HandleRead, this));
+  accept_channel_.SetReadCallback(std::bind(&Acceptor::HandleRead, this));
 }
 
 Acceptor::~Acceptor() {
@@ -22,14 +22,14 @@ Acceptor::~Acceptor() {
 }
 
 void Acceptor::Listen() {
-  loop_->assertInLoopThread();
+  loop_->AssertInLoopThread();
   listenning_ = true;
   socket_.Listen();
-  accept_channel_.enableReading();
+  accept_channel_.EnableReading();
 }
 
 void Acceptor::HandleRead() {
-  loop_->assertInLoopThread();
+  loop_->AssertInLoopThread();
   InetAddress addr;
   int connfd = socket_.Accept(addr);
   if (connfd >= 0) {

@@ -8,11 +8,11 @@ using namespace muduo;
 Channel::~Channel() {
 }
 
-void Channel::updateChannel() {
-  loop_->updateChannel(this);
+void Channel::UpdateChannel() {
+  loop_->UpdateChannel(this);
 }
 
-void Channel::handleEvent() {
+void Channel::HandleEvent() {
   if (revents_ & EPOLLERR) {
     error_callback_();
   } else if (revents_ & (EPOLLIN | EPOLLPRI)) {

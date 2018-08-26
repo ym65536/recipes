@@ -26,8 +26,8 @@ EventLoop::EventLoop() : mutex_(), wakeup_fd_(createEfd()),
   t_current_loop = this;
   epoller_.reset(new EPoller(this));
   timer_queue_.reset(new TimerQueue(this));
-  wakeup_channel_.setReadCallback(std::bind(&EventLoop::handleRead, this));
-  wakeup_channel_.enableReading();
+  wakeup_channel_.SetReadCallback(std::bind(&EventLoop::HandleRead, this));
+  wakeup_channel_.EnableReading();
 }
 
 EventLoop::~EventLoop() {
@@ -35,7 +35,7 @@ EventLoop::~EventLoop() {
   t_current_loop = nullptr;
 }
 
-void EventLoop::handleRead() {
+void EventLoop::HandleRead() {
   uint64_t counter = 0;
   int nbytes = read(wakeup_fd_, &counter, sizeof(counter));
   if (nbytes != sizeof (counter)) {
@@ -65,7 +65,7 @@ void EventLoop::abortInLoop(const std::string& msg) {
 
 void EventLoop::loop() {
   assert(!looping_);
-  assertInLoopThread();
+  AssertInLoopThread();
 
   looping_ = true;
   
@@ -74,7 +74,7 @@ void EventLoop::loop() {
     LOG_DEBUG << "Go to poll at time " << Timestamp::now().toString();
     epoller_->poll(EPOLL_TIMEOUT_MS, active_channels_);
     for (auto channel : active_channels_) {
-      channel->handleEvent();
+      channel->HandleEvent();
     }
     doPendingFunctors();
   }
@@ -91,7 +91,7 @@ void EventLoop::quit(void) {
   }
 }
 
-void EventLoop::runInLoop(const Functor& cb) {
+void EventLoop::RunInLoop(const Functor& cb) {
   if (isInLoopThread()) {
     cb();
   } else {
@@ -115,23 +115,23 @@ void EventLoop::doPendingFunctors() {
   }
 }
 
-void EventLoop::updateChannel(Channel* channel) {
+void EventLoop::UpdateChannel(Channel* channel) {
   assert(channel->ownerLoop() == this);
-  assertInLoopThread();
-  epoller_->updateChannel(channel);
+  AssertInLoopThread();
+  epoller_->UpdateChannel(channel);
 }
 
-TimerId EventLoop::runAt(const Timestamp& when, const TimeoutCallback& cb) {
+TimerId EventLoop::RunAt(const Timestamp& when, const TimeoutCallback& cb) {
   return timer_queue_->addTimer(cb, when, 0.0);
 }
 
-TimerId EventLoop::runAfter(double interval, const TimeoutCallback& cb) {
+TimerId EventLoop::RunAfter(double interval, const TimeoutCallback& cb) {
   Timestamp when = addTime(Timestamp::now(), interval);
   LOG_DEBUG << "when = " << when.toString();
-  return runAt(when, cb);
+  return RunAt(when, cb);
 }
 
-TimerId EventLoop::runEvery(double interval, const TimeoutCallback& cb) {
+TimerId EventLoop::RunEvery(double interval, const TimeoutCallback& cb) {
   Timestamp when = addTime(Timestamp::now(), interval);
   return timer_queue_->addTimer(cb, when, interval);
 }

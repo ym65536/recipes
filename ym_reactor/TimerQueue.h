@@ -26,7 +26,7 @@ class TimerQueue {
   typedef std::set<TimerEntry> TimerList;
   
   void addTimerInLoop(const TimerPtr& timer);
-  void handleRead();
+  void HandleRead();
   void getExpiredTimer(const Timestamp& now, std::vector<TimerEntry>&);
   
   bool insertTimer(const TimerPtr& timer);

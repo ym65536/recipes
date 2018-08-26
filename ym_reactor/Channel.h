@@ -25,16 +25,16 @@ class Channel {
     }
   ~Channel();
 
-  void handleEvent();
-  void setReadCallback(const EventCallback& cb) {
+  void HandleEvent();
+  void SetReadCallback(const EventCallback& cb) {
     read_callback_ = cb;
   }
 
-  void setWriteCallback(const EventCallback& cb) {
+  void SetWriteCallback(const EventCallback& cb) {
     write_callback_ = cb;
   }
 
-  void setErrorCallback(const EventCallback& cb) {
+  void SetErrorCallback(const EventCallback& cb) {
     error_callback_ = cb;
   }
   int fd() const {
@@ -53,15 +53,15 @@ class Channel {
     revents_ = events;
   }
 
-  void enableReading() {
+  void EnableReading() {
     events_ |= READ_EVENT | EPOLLET; // edge trigger?
 //events_ |= READ_EVENT  // level trigger?
     LOG_INFO << "Read event=" << events_;
-    updateChannel();
+    UpdateChannel();
   }
   
  private:
-  void updateChannel();
+  void UpdateChannel();
   
   EventLoop* loop_ = nullptr;
   int fd_ = -1;

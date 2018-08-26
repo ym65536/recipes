@@ -13,21 +13,21 @@ void run4()
 void run3()
 {
   printf("run3(): pid = %d, flag = %d\n", getpid(), g_flag);
-  g_loop->runAfter(3, run4);
+  g_loop->RunAfter(3, run4);
   g_flag = 3;
 }
 
 void run2()
 {
   printf("run2(): pid = %d, flag = %d\n", getpid(), g_flag);
-  g_loop->runInLoop(run3);
+  g_loop->RunInLoop(run3);
 }
 
 void run1()
 {
   g_flag = 1;
   printf("run1(): pid = %d, flag = %d\n", getpid(), g_flag);
-  g_loop->runInLoop(run2);
+  g_loop->RunInLoop(run2);
   g_flag = 2;
 }
 
@@ -38,7 +38,7 @@ int main()
   muduo::EventLoop loop;
   g_loop = &loop;
 
-  loop.runAfter(2, run1);
+  loop.RunAfter(2, run1);
   loop.loop();
   printf("main(): pid = %d, flag = %d\n", getpid(), g_flag);
 }

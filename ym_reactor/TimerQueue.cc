@@ -52,8 +52,8 @@ void resetTimerFd(int timer_fd, const Timestamp& when) {
 TimerQueue::TimerQueue(EventLoop* loop) :
   loop_(loop), timerfd_(createTimerFd()),
   timer_channel_(loop_, timerfd_) {
-  timer_channel_.setReadCallback(std::bind(&TimerQueue::handleRead, this));
-  timer_channel_.enableReading();
+  timer_channel_.SetReadCallback(std::bind(&TimerQueue::HandleRead, this));
+  timer_channel_.EnableReading();
 }
 
 TimerQueue::~TimerQueue() {
@@ -62,12 +62,12 @@ TimerQueue::~TimerQueue() {
 TimerId TimerQueue::addTimer(const TimeoutCallback& cb, const Timestamp& when, 
     double interval) {
   TimerPtr timer = make_shared<Timer>(cb, when, interval);
-  loop_->runInLoop(std::bind(&TimerQueue::addTimerInLoop, this, timer));
+  loop_->RunInLoop(std::bind(&TimerQueue::addTimerInLoop, this, timer));
   return timer.get();
 }
 
 void TimerQueue::addTimerInLoop(const TimerPtr& timer) {
-  loop_->assertInLoopThread();
+  loop_->AssertInLoopThread();
   bool early = insertTimer(timer);
   if (early) {
     resetTimerFd(timerfd_, timer->when());
@@ -99,8 +99,8 @@ void TimerQueue::getExpiredTimer(const Timestamp& now,
   timers_.erase(timers_.begin(), it);
 }
 
-void TimerQueue::handleRead() {
-  loop_->assertInLoopThread();
+void TimerQueue::HandleRead() {
+  loop_->AssertInLoopThread();
 
   Timestamp now(Timestamp::now());
   readTimerFd(timerfd_);
