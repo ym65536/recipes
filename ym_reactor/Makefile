@@ -6,9 +6,11 @@ LIB_SRC = EventLoop.cc \
   EventLoopThread.cc \
   inet_address.cc \
   socket.cc \
-  acceptor.cc 
+  acceptor.cc \
+  tcp_server.cc \
+  tcp_connection.cc
 
-BINARIES = test1 test2 test3 test4 test5 test6 test7
+BINARIES = test1 test2 test3 test4 test5 test6 test7 test8
 
 all: $(BINARIES)
 
@@ -21,3 +23,4 @@ test4: test4.cc
 test5: test5.cc
 test6: test6.cc
 test7: test7.cc
+test8: test8.cc

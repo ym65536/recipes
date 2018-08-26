@@ -9,7 +9,7 @@ using namespace muduo;
 void OnConnection(int sockfd, const InetAddress& peerAddr)
 {
   printf("newConnection(): accepted a new connection from %s\n",
-         peerAddr.to_host_port().c_str());
+         peerAddr.ToHostPort().c_str());
   ::write(sockfd, "How are you?\n", 13);
   sockets::Close(sockfd);
 }
@@ -21,7 +21,7 @@ int main(void) {
   EventLoop loop;
 
   Acceptor acceptor(&loop, addr);
-  acceptor.SetNewConnectionCallback(OnConnection);
+  acceptor.SetConnectionCallback(OnConnection);
   acceptor.Listen();
 
   loop.loop();

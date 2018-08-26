@@ -16,7 +16,7 @@ class Acceptor {
   Acceptor(EventLoop* loop, const InetAddress& addr);
   ~Acceptor();
 
-  void SetNewConnectionCallback(const NewConnectionCallback& cb) {
+  void SetConnectionCallback(const NewConnectionCallback& cb) {
     cb_ = cb;
   }
 

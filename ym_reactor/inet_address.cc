@@ -17,10 +17,15 @@ InetAddress::InetAddress(const std::string& ip, int port) {
   }
 }
 
+InetAddress::InetAddress(const struct sockaddr_in& addr) {
+  std::string ip = inet_ntoa(addr.sin_addr);
+  InetAddress(ip, addr.sin_port);
+}
+
 InetAddress::~InetAddress() {
 }
 
-std::string InetAddress::to_host_port() const {
+std::string InetAddress::ToHostPort() const {
   char host[INET_ADDRSTRLEN] = "INVALID";
   char buf[100] = {0};
   sockaddr_in addr = addr_;
@@ -69,3 +74,14 @@ void sockets::Close(int sockfd) {
     LOG_SYSERR << "close";
   }
 }
+
+struct sockaddr_in sockets::GetLocalAddr(int sockfd) {
+  struct sockaddr_in localaddr;
+  bzero(&localaddr, sizeof localaddr);
+  socklen_t addrlen = sizeof(localaddr);
+  if (::getsockname(sockfd, reinterpret_cast<sockaddr*>(&localaddr), &addrlen) < 0) {
+    LOG_SYSERR << "sockets::getLocalAddr";
+  }
+  return localaddr;
+}
+

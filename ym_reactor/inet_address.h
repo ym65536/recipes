@@ -33,12 +33,12 @@ inline uint16_t networkToHost16(uint16_t net16) {
 
 class InetAddress {
  public:
-  InetAddress() {
-  }
+  InetAddress() { }
   InetAddress(const std::string& ip, int port);
+  InetAddress(const struct sockaddr_in& addr);
   ~InetAddress();
 
-  std::string to_host_port() const;
+  std::string ToHostPort() const;
 
   const struct sockaddr_in& GetSockAddrInet() const { return addr_; }
   void SetSockAddrInet(const struct sockaddr_in& addr) { addr_ = addr; }
@@ -54,6 +54,7 @@ void Bind(int sockfd, const struct sockaddr_in& addr);
 void Listen(int sockfd); 
 int Accept(int sockfd, struct sockaddr_in& addr); 
 void Close(int sockfd); 
+struct sockaddr_in GetLocalAddr(int sockfd);
 }
 
 }
