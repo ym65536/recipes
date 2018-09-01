@@ -136,3 +136,8 @@ TimerId EventLoop::RunEvery(double interval, const TimeoutCallback& cb) {
   return timer_queue_->addTimer(cb, when, interval);
 }
 
+void EventLoop::RemoveChannel(Channel* channel) {
+  AssertInLoopThread();
+  assert(channel->OwnerLoop() == this);
+  epoller_->RemoveChannel(channel);
+}

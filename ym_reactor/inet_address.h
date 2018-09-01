@@ -55,6 +55,8 @@ void Listen(int sockfd);
 int Accept(int sockfd, struct sockaddr_in& addr); 
 void Close(int sockfd); 
 struct sockaddr_in GetLocalAddr(int sockfd);
+int GetSocketError(int sockfd);
+
 }
 
 }

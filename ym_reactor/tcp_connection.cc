@@ -37,6 +37,40 @@ void TcpConnection::Connect() {
 void TcpConnection::HandleRead() {
   char buf[0x1000];
   size_t nbytes = ::read(socket_->sockfd(), buf, sizeof(buf));
-  message_cb_(shared_from_this(), buf, nbytes);
+  if (nbytes > 0) {
+    message_cb_(shared_from_this(), buf, nbytes);
+  } else if (nbytes == 0) {
+    HandleClose();
+  } else {
+    HandleError();
+  }
+}
+
+void TcpConnection::HandleWrite(){
+  LOG_INFO << "HandleWrite called.";
+}
+
+void TcpConnection::HandleClose() {
+  assert(state_ == kConnected);
+  channel_->DisableAll();
+  close_cb_(shared_from_this());
+}
+
+void TcpConnection::HandleError() {
+  int err = sockets::GetSocketError(channel_->fd());
+  LOG_ERROR << "handleError [" << name_ << "] - SO_ERROR = " << err << " " 
+      << strerror_tl(err);
+}
+
+/*
+  Destroy is last function before this tcp connection destroyed. 
+ */
+void TcpConnection::Destroy() {
+  assert(state_ == kConnected);
+  SetState(kDisconnected);
+  channel_->DisableAll();
+  connection_cb_(shared_from_this());
+
+  loop_->RemoveChannel(channel_);
 }
 

@@ -26,17 +26,21 @@ class Channel {
   ~Channel();
 
   void HandleEvent();
+
+
   void SetReadCallback(const EventCallback& cb) {
     read_callback_ = cb;
   }
-
   void SetWriteCallback(const EventCallback& cb) {
     write_callback_ = cb;
   }
-
   void SetErrorCallback(const EventCallback& cb) {
     error_callback_ = cb;
   }
+  void SetCloseCallback(const EventCallback& cb) {
+    close_callback_ = cb;
+  }
+
   int fd() const {
     return fd_;
   }
@@ -67,9 +71,11 @@ class Channel {
   int fd_ = -1;
   int events_ = 0;
   int revents_ = 0;
+  bool event_handling_ = false;
 
   EventCallback read_callback_;
   EventCallback write_callback_;
+  EventCallback close_callback_;
   EventCallback error_callback_;
 };
 

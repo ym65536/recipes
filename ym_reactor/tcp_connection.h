@@ -26,9 +26,16 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
     message_cb_ = cb;
   }
 
-  void Connect();
+  void SetCloseCallback(const CloseCallback& cb) {
+    close_cb_ = cb;
+  }
 
-  bool Connected() {
+  // start connection
+  void Connect();
+  // destroy connection
+  void Destroy();
+
+  bool IsConnected() {
     return state_ == kConnected;
   }
 
@@ -48,12 +55,17 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   enum TcpState {
     kConnecting = 0,
     kConnected = 1,
+    kDisconnected = 2,
   };
 
-  void HandleRead();
   void SetState(TcpState s) {
     state_ = s;
   }
+
+  void HandleRead();
+  void HandleWrite();
+  void HandleClose();
+  void HandleError();
 
   EventLoop* loop_;
   std::unique_ptr<Channel> channel_;
@@ -65,7 +77,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
 
   ConnectionCallback connection_cb_;
   MessageCallback message_cb_;
-
+  CloseCallback close_cb_;
 };
 
 }

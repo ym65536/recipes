@@ -5,7 +5,12 @@
 
 using namespace muduo;
 
+Channel(EventLoop* loop, int fd):
+  loop_(loop), fd_(fd) {
+}
+
 Channel::~Channel() {
+  assert(event_handling_ == false);
 }
 
 void Channel::UpdateChannel() {
@@ -13,7 +18,10 @@ void Channel::UpdateChannel() {
 }
 
 void Channel::HandleEvent() {
-  if (revents_ & EPOLLERR) {
+  event_handling_ = true;
+  if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
+    close_callback_();
+  } else if (revents_ & EPOLLERR) {
     error_callback_();
   } else if (revents_ & (EPOLLIN | EPOLLPRI)) {
     read_callback_();
@@ -22,5 +30,6 @@ void Channel::HandleEvent() {
   } else {
     LOG_ERROR << "Unknown events: " << revents_;
   }
+  event_handling_ = false;
 }
 
