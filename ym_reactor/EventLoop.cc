@@ -116,7 +116,7 @@ void EventLoop::doPendingFunctors() {
 }
 
 void EventLoop::UpdateChannel(Channel* channel) {
-  assert(channel->ownerLoop() == this);
+  assert(channel->OwnerLoop() == this);
   AssertInLoopThread();
   epoller_->UpdateChannel(channel);
 }

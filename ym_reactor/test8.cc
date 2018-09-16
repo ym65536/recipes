@@ -10,7 +10,7 @@ using namespace muduo;
 
 void onConnection(const TcpConnectionPtr& conn)
 {
-  if (conn->Connected())
+  if (conn->IsConnected())
   {
     printf("onConnection(): new connection [%s] from %s\n",
            conn->ConnName().c_str(),

@@ -45,6 +45,8 @@ class EventLoop {
   void HandleRead();
   void wakeup();
 
+  void RemoveChannel(Channel* channel);
+
   TimerId RunAt(const Timestamp& when, const TimeoutCallback& cb);
   TimerId RunAfter(double interval, const TimeoutCallback& cb);
   TimerId RunEvery(double interval, const TimeoutCallback& cb);

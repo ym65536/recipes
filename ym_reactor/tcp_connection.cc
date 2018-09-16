@@ -58,7 +58,7 @@ void TcpConnection::HandleClose() {
 
 void TcpConnection::HandleError() {
   int err = sockets::GetSocketError(channel_->fd());
-  LOG_ERROR << "handleError [" << name_ << "] - SO_ERROR = " << err << " " 
+  LOG_ERROR << "handleError [" << conn_name_ << "] - SO_ERROR = " << err << " " 
       << strerror_tl(err);
 }
 
@@ -71,6 +71,6 @@ void TcpConnection::Destroy() {
   channel_->DisableAll();
   connection_cb_(shared_from_this());
 
-  loop_->RemoveChannel(channel_);
+  loop_->RemoveChannel(channel_.get());
 }
 

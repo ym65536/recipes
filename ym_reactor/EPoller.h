@@ -22,6 +22,7 @@ class EPoller {
   Timestamp poll(int timeoutMs, ChannelList& active_channels);
   void fillActiveChannels(int nevents, ChannelList& active_channels);
 
+  void RemoveChannel(Channel* channel);
   void UpdateChannel(Channel* channel);
   void update(int opt, Channel* channel);
 

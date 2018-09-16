@@ -61,9 +61,25 @@ void EPoller::UpdateChannel(Channel* channel) {
     update(EPOLL_CTL_ADD, channel);
   } else {
     assert(channels_[fd] == channel);
-    update(EPOLL_CTL_MOD, channel);
+    if (channel->isNoneEvent())
+    {
+      update(EPOLL_CTL_DEL, channel);
+    } else {
+      update(EPOLL_CTL_MOD, channel);
+    }
   }
   LOG_DEBUG << "channels size = " << channels_.size();
+}
+
+void EPoller::RemoveChannel(Channel* channel) {
+  AssertInLoopThread();
+  int fd = channel->fd();
+  LOG_DEBUG << "Remove channel, fd = " << fd;
+  assert(channels_.find(fd) != channels_.end());
+  assert(channels_[fd] == channel);
+  assert(channel->isNoneEvent());
+  channels_.erase(fd);
+  update(EPOLL_CTL_DEL, channel);
 }
 
 void EPoller::update(int opt, Channel* channel) {

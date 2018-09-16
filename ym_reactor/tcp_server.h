@@ -28,6 +28,8 @@ class TcpServer {
 
  private:
   void NewConnection(int sockfd, const InetAddress& addr);
+  void RemoveConnection(const TcpConnectionPtr& conn);
+
   typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;
 
   EventLoop* loop_;

@@ -13,16 +13,14 @@ class EventLoop;
 typedef std::function<void()> EventCallback;
 
 enum {
+  kNoneEvent = 0,
   READ_EVENT = EPOLLIN | EPOLLPRI,
   WRITE_EVENT = EPOLLOUT,
-  ERROR_EVENT = 0,
 };
 
 class Channel {
  public:
-  Channel(EventLoop* loop, int fd):
-    loop_(loop), fd_(fd) {
-    }
+  Channel(EventLoop* loop, int fd);
   ~Channel();
 
   void HandleEvent();
@@ -45,7 +43,11 @@ class Channel {
     return fd_;
   }
 
-  EventLoop* ownerLoop() {
+  bool isNoneEvent() const { 
+    return events_ == kNoneEvent; 
+  }
+
+  EventLoop* OwnerLoop() {
     return loop_;
   }
 
@@ -61,6 +63,11 @@ class Channel {
     events_ |= READ_EVENT | EPOLLET; // edge trigger?
 //events_ |= READ_EVENT  // level trigger?
     LOG_INFO << "Read event=" << events_;
+    UpdateChannel();
+  }
+  
+  void DisableAll() {
+    events_ = kNoneEvent;
     UpdateChannel();
   }
   
