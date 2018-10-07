@@ -18,6 +18,7 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& addr) :
   }
 
 TcpServer::~TcpServer() {
+  LOG_DEBUG << "Release TcpServer...";
 }
 
 void TcpServer::Start() {
@@ -49,6 +50,6 @@ void TcpServer::RemoveConnection(const TcpConnectionPtr& conn) {
   LOG_DEBUG << "remove conneciton=" << conn->ConnName() << 
     " from " << conn->PeerAddr().ToHostPort();
   conns_.erase(conn->ConnName());
-  loop_->RunInLoop(std::bind(&TcpConnection::Destroy, conn.get()));
+  loop_->QueueInLoop(std::bind(&TcpConnection::Destroy, conn));
 }
 

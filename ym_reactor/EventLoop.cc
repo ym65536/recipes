@@ -95,16 +95,28 @@ void EventLoop::RunInLoop(const Functor& cb) {
   if (isInLoopThread()) {
     cb();
   } else {
-    {
-      MutexLockGuard lock(mutex_);
-      pending_functors_.push_back(cb);
-    }
+    QueueInLoop(cb);
+  }
+}
+
+void EventLoop::QueueInLoop(const Functor& cb)
+{
+  {
+    MutexLockGuard lock(mutex_);
+    pending_functors_.push_back(cb);
+  }
+  LOG_DEBUG << "QueueInLoop: record pend functiors...";
+
+  if (!isInLoopThread() || call_pending_functors_)
+  {
+    LOG_DEBUG << "QueueInLoop: Need wakeup...";
     wakeup();
   }
 }
 
 void EventLoop::doPendingFunctors() {
   vector<Functor> tmp_functors;
+  call_pending_functors_ = true;
   {
     MutexLockGuard lock(mutex_);
     pending_functors_.swap(tmp_functors);
@@ -113,6 +125,7 @@ void EventLoop::doPendingFunctors() {
   for (auto functor : tmp_functors) {
     functor();
   }
+  call_pending_functors_ = false;
 }
 
 void EventLoop::UpdateChannel(Channel* channel) {

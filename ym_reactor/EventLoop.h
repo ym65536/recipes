@@ -40,6 +40,7 @@ class EventLoop {
   EventLoop* getCurrentLoop();
 
   void RunInLoop(const Functor&);
+  void QueueInLoop(const Functor& cb);
   void doPendingFunctors();
 
   void HandleRead();
@@ -59,6 +60,7 @@ class EventLoop {
   const pid_t thread_id_ = CurrentThread::tid();
   bool looping_ = false;
   bool quit_ = false;
+  bool call_pending_functors_ = false;
   ChannelList active_channels_;
   EPollerPtr epoller_;
   TimerQueuePtr timer_queue_;

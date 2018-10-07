@@ -36,7 +36,7 @@ Timestamp EPoller::poll(int timeoutMs, ChannelList& active_channels) {
       epoll_events_.resize(nevents * 2);
     }
   } else if (nevents == 0) {
-    LOG_DEBUG << "Nothing happen. must be timeout.";
+    LOG_TRACE << "Nothing happen. must be timeout.";
   } else {
     LOG_SYSERR << "EPoller::poll()";
   }
@@ -56,19 +56,18 @@ void EPoller::fillActiveChannels(int nevents, ChannelList& active_channels) {
 void EPoller::UpdateChannel(Channel* channel) {
   AssertInLoopThread();
   int fd = channel->fd();
+  LOG_DEBUG << "channels size = " << channels_.size() << ", fd=" << fd;
   if (channels_.find(fd) == channels_.end()) {
     channels_[fd] = channel;
     update(EPOLL_CTL_ADD, channel);
   } else {
     assert(channels_[fd] == channel);
-    if (channel->isNoneEvent())
-    {
+    if (channel->isNoneEvent()) {
       update(EPOLL_CTL_DEL, channel);
     } else {
       update(EPOLL_CTL_MOD, channel);
     }
   }
-  LOG_DEBUG << "channels size = " << channels_.size();
 }
 
 void EPoller::RemoveChannel(Channel* channel) {

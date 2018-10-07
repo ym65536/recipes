@@ -37,6 +37,7 @@ void TcpConnection::Connect() {
 void TcpConnection::HandleRead() {
   char buf[0x1000];
   size_t nbytes = ::read(socket_->sockfd(), buf, sizeof(buf));
+  LOG_DEBUG << "Recv msg size=" << nbytes << ", content=" << buf;
   if (nbytes > 0) {
     message_cb_(shared_from_this(), buf, nbytes);
   } else if (nbytes == 0) {
@@ -52,6 +53,7 @@ void TcpConnection::HandleWrite(){
 
 void TcpConnection::HandleClose() {
   assert(state_ == kConnected);
+  LOG_DEBUG << "My Channle id=" << channel_->fd();
   channel_->DisableAll();
   close_cb_(shared_from_this());
 }
@@ -71,6 +73,8 @@ void TcpConnection::Destroy() {
   channel_->DisableAll();
   connection_cb_(shared_from_this());
 
+  // FixMe: need call queueInLoop, otherwise channle_ will be release
+  // before handleEvent finish.
   loop_->RemoveChannel(channel_.get());
 }
 
