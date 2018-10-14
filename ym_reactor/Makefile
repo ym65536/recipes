@@ -8,7 +8,8 @@ LIB_SRC = EventLoop.cc \
   socket.cc \
   acceptor.cc \
   tcp_server.cc \
-  tcp_connection.cc
+  tcp_connection.cc \
+  buffer.cc
 
 BINARIES = test1 test2 test3 test4 test5 test6 test7 test8
 

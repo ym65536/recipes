@@ -3,9 +3,10 @@
 
 #include "tcp_connection.h"
 #include <memory>
+#include <inet_address.h>
 #include "socket.h"
 #include "Callbacks.h"
-#include <inet_address.h>
+#include "buffer.h"
 
 namespace muduo {
 
@@ -78,6 +79,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   ConnectionCallback connection_cb_;
   MessageCallback message_cb_;
   CloseCallback close_cb_;
+  Buffer inbuf_;
 };
 
 }

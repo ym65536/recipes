@@ -35,14 +35,16 @@ void TcpConnection::Connect() {
 }
 
 void TcpConnection::HandleRead() {
-  char buf[0x1000];
-  size_t nbytes = ::read(socket_->sockfd(), buf, sizeof(buf));
-  LOG_DEBUG << "Recv msg size=" << nbytes << ", content=" << buf;
+  int retcode = 0;
+  size_t nbytes = inbuf_.ReadFd(socket_->sockfd(), &retcode);
+  LOG_DEBUG << "Recv msg size=" << nbytes << ", content=" << inbuf_.Peek();
   if (nbytes > 0) {
-    message_cb_(shared_from_this(), buf, nbytes);
+    message_cb_(shared_from_this(), &inbuf_);
   } else if (nbytes == 0) {
     HandleClose();
   } else {
+    errno = retcode;
+    LOG_SYSERR << "TcpConnection: HandleRead";
     HandleError();
   }
 }

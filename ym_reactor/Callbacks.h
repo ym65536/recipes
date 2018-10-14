@@ -9,6 +9,8 @@ namespace muduo {
 
 class InetAddress;
 class TcpConnection;
+class Buffer;
+
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 
 typedef std::function<void ()> TimeoutCallback;
@@ -23,8 +25,7 @@ typedef std::function<void (int sockfd,
                   const InetAddress&)> NewConnectionCallback;
 
 typedef std::function<void (const TcpConnectionPtr&,
-                              const char* data,
-                              ssize_t len)> MessageCallback;
+                            Buffer* buf)> MessageCallback;
 
 typedef std::function<void (const TcpConnectionPtr&)> CloseCallback;
 
