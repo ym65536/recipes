@@ -41,10 +41,13 @@ void Socket::ReuseAddr(bool on) {
                &optval, sizeof optval);
 }
 
-void Socket::ShutdownWrite()
-{
-  if (::shutdown(sockfd_, SHUT_WR) < 0)
-  {
+void Socket::ShutdownWrite() {
+  if (::shutdown(sockfd_, SHUT_WR) < 0) {
     LOG_SYSERR << "sockets::shutdownWrite";
   }
+}
+
+void Socket::TcpNoDelay(bool on) {
+  int opt = on ? 1 : 0;
+  ::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
 }

@@ -40,6 +40,10 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   
   void Shutdown();
 
+  void TcpNoDelay(bool on) {
+    socket_->TcpNoDelay(on);
+  }
+
   bool IsConnected() {
     return state_ == kConnected;
   }
