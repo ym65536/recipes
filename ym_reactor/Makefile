@@ -1,6 +1,6 @@
 LIB_SRC = EventLoop.cc \
   EPoller.cc \
-  Channel.cc \
+  channel.cc \
   Timer.cc \
   TimerQueue.cc \
   EventLoopThread.cc \

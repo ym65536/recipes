@@ -1,5 +1,5 @@
 #include "EPoller.h"
-#include "Channel.h"
+#include "channel.h"
 #include "thread/Thread.h"
 #include "logging/Logging.h"
 #include <sys/epoll.h>

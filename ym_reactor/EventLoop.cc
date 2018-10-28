@@ -1,6 +1,6 @@
 #include "EventLoop.h"
 #include "EPoller.h"
-#include <Channel.h>
+#include "channel.h"
 #include <TimerQueue.h>
 #include "logging/Logging.h"
 #include <assert.h>
