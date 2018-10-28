@@ -41,3 +41,10 @@ void Socket::ReuseAddr(bool on) {
                &optval, sizeof optval);
 }
 
+void Socket::ShutdownWrite()
+{
+  if (::shutdown(sockfd_, SHUT_WR) < 0)
+  {
+    LOG_SYSERR << "sockets::shutdownWrite";
+  }
+}

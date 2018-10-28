@@ -27,6 +27,7 @@ void onMessage(const TcpConnectionPtr& conn,
                Buffer* buf) {
   printf("onMessage(): received %zd bytes from connection [%s]\n",
          buf->ReadableBytes(), conn->ConnName().c_str());
+  conn->Send(buf->RetrieveAsString());
 }
 
 int main()

@@ -19,6 +19,7 @@ class Socket {
   void Listen();
   int Accept(InetAddress& peeraddr);
   void ReuseAddr(bool on);
+  void ShutdownWrite();
 
   int sockfd() const { return sockfd_; }
  private:

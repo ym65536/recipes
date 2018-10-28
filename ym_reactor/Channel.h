@@ -62,7 +62,22 @@ class Channel {
   void EnableReading() {
     events_ |= READ_EVENT | EPOLLET; // edge trigger?
 //events_ |= READ_EVENT  // level trigger?
-    LOG_INFO << std::hex << "Read event=" << events_;
+    LOG_INFO << std::hex << "Enable Read event=" << events_;
+    UpdateChannel();
+  }
+
+  void EnableWriting() {
+    events_ |= WRITE_EVENT;
+    LOG_INFO << "Enable Write event=" << events_;
+    UpdateChannel();
+  }
+
+  bool CanWrite() {
+    return events_ & WRITE_EVENT;
+  }
+
+  void DisableWrite() {
+    events_ &= (~WRITE_EVENT);
     UpdateChannel();
   }
   

@@ -51,6 +51,28 @@ void TcpConnection::HandleRead() {
 
 void TcpConnection::HandleWrite(){
   LOG_INFO << "HandleWrite called.";
+  loop_->AssertInLoopThread();
+  if (!channel_->CanWrite()) {
+    LOG_ERROR << "Connection is down, no more write.";
+    return;
+  }
+  ssize_t nbytes = ::write(channel_->fd(), 
+                           outbuf_.Peek(),
+                           outbuf_.ReadableBytes());
+  if (nbytes < 0) {
+    LOG_SYSERR << "TcpConnection HandleWrite";
+    return;
+  }
+  outbuf_.Retrieve(nbytes);
+  if (outbuf_.ReadableBytes() == 0) {
+    channel_->DisableWrite();
+    if (state_ == kDisconnecting) {
+      ShutdownInLoop();
+    }
+  } else {
+    LOG_WARN << "Going to write more data. nbytes=" << nbytes 
+        << ", left=" << outbuf_.ReadableBytes();
+  }
 }
 
 void TcpConnection::HandleClose() {
@@ -80,3 +102,49 @@ void TcpConnection::Destroy() {
   loop_->RemoveChannel(channel_.get());
 }
 
+void TcpConnection::Send(const std::string& message) {
+  assert(state_ == kConnected);
+  loop_->RunInLoop(std::bind(&TcpConnection::SendInLoop, this, message));
+}
+
+void TcpConnection::SendInLoop(const std::string& message) {
+  loop_->AssertInLoopThread();
+  ssize_t nbytes = 0;
+  if (!channel_->CanWrite() && outbuf_.ReadableBytes() == 0) {
+    nbytes = ::write(channel_->fd(), message.data(), message.size());
+    if (nbytes >= 0) {
+      if ((uint32_t)nbytes < message.size()) {
+        LOG_WARN << "Going to write more data. nbytes=" << nbytes 
+            << ",message_size=" << message.size();
+      }
+    } else {
+      nbytes = 0;
+      if (errno != EAGAIN) {
+        LOG_SYSERR << "TcpConnection::SendInLoop";
+      }
+    }
+  }
+
+  assert(nbytes >= 0);
+  if ((uint32_t)nbytes < message.size()) {
+    outbuf_.Append(message.data() + nbytes, message.size() - nbytes);
+    if (!channel_->CanWrite()) {
+      channel_->EnableWriting();
+    }
+  }
+}
+
+void TcpConnection::Shutdown() {
+  assert(state_ == kConnected);
+  SetState(kDisconnecting);
+  loop_->RunInLoop(std::bind(&TcpConnection::ShutdownInLoop, this));
+}
+
+void TcpConnection::ShutdownInLoop() {
+  loop_->AssertInLoopThread();
+  if (!channel_->CanWrite()) {
+    socket_->ShutdownWrite();
+  } else {
+    LOG_ERROR << "Writing...Can not shutdown";
+  }
+}
