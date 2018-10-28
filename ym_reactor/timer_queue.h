@@ -3,7 +3,7 @@
 
 #include <datetime/Timestamp.h>
 #include "channel.h"
-#include "Timer.h"
+#include "timer.h"
 #include <set>
 #include <vector>
 

@@ -1,8 +1,8 @@
 LIB_SRC = EventLoop.cc \
   EPoller.cc \
   channel.cc \
-  Timer.cc \
-  TimerQueue.cc \
+  timer.cc \
+  timer_queue.cc \
   EventLoopThread.cc \
   inet_address.cc \
   socket.cc \
