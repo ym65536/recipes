@@ -1,5 +1,5 @@
 #include "event_loop.h"
-#include "EventLoopThread.h"
+#include "event_loop_thread.h"
 #include <stdio.h>
 
 void runInThread()

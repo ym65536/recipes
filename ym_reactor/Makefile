@@ -3,7 +3,7 @@ LIB_SRC = event_loop.cc \
   channel.cc \
   timer.cc \
   timer_queue.cc \
-  EventLoopThread.cc \
+  event_loop_thread.cc \
   inet_address.cc \
   socket.cc \
   acceptor.cc \
