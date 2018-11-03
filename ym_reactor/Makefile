@@ -1,4 +1,4 @@
-LIB_SRC = EventLoop.cc \
+LIB_SRC = event_loop.cc \
   EPoller.cc \
   channel.cc \
   timer.cc \
