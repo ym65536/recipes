@@ -1,11 +1,10 @@
-LIB_SRC = event_loop.cc \
-  epoller.cc \
-  channel.cc 
+LIB_SRC = event_loop.cc 
 
-BINARIES = test1 
+BINARIES = test1 test2 
 
 all: $(BINARIES)
 
 include reactor.mk
 
-test1: test1.cc
+test1: test1.cc 
+test2: test2.cc
