@@ -1,19 +1,16 @@
 #include <unistd.h>
 #include "event_loop.h"
 #include "logging.h"
+#include "channel.h"
+#include "epoller.h"
 
 using namespace std;
 using namespace yevent;
 
 __thread EventLoop* t_this_loop = nullptr;
 
-EventLoop::EventLoop(): epollfd_(-1), looping_(false), 
-    tid_(CurrentThread::tid()) {
-  epollfd_ = epoll_create(EPOLL_FD_SIZE);
-  if (epollfd_ == -1) {
-    LOG_SYSERR << "epoll_create1";
-    exit(EXIT_FAILURE);
-  }
+EventLoop::EventLoop(): epollfd_(-1), looping_(false), quit_(false), 
+    tid_(CurrentThread::tid()), epoller_(new EPoller(this)) {
   if (t_this_loop) {
     LOG_FATAL << "Another EventLoop=" << t_this_loop << " exist in thread=" << tid_;
   }
@@ -23,21 +20,27 @@ EventLoop::EventLoop(): epollfd_(-1), looping_(false),
 } 
 
 EventLoop::~EventLoop() {
-  if (epollfd_ > 0) {
-    close(epollfd_);
-  }
 }
 
 void EventLoop::Loop() {
   assert(looping_ == false);
   AssertInLoop();
   looping_ = true;
-  
-  epoll_wait(epollfd_, nullptr, EPOLL_FD_SIZE, 5 * 1000);
+ 
+  while (!quit_) {
+    epoller_->Poll(&channels_, kEPollTimeoutMs);
+    for (auto channel : channels_) {
+      channel->HandleEvent();
+    }
+  }
 
   LOG_TRACE << "EventLoop=" << t_this_loop << " stop loop.";
   looping_ = false;
 } 
+
+void EventLoop::Quit() {
+  quit_ = true;
+}
 
 void EventLoop::AssertInLoop() {
   if (!IsInLoop()) {
@@ -48,4 +51,9 @@ void EventLoop::AssertInLoop() {
 
 EventLoop* EventLoop::GetLoop() {
   return t_this_loop;
+}
+
+void EventLoop::UpdateChannel(Channel* channel) {
+  assert(channel);
+  epoller_->UpdateChannel(channel);
 }
