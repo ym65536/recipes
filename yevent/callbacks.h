@@ -7,5 +7,6 @@ typedef std::function<void()> EventCallback;
 
 typedef std::function<void()> TimerCallback;
 
+typedef std::function<void()> Functor;
 
 #endif
