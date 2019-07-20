@@ -18,7 +18,7 @@ void Channel::UpdateEvents() {
 }
 
 void Channel::HandleEvent() {
-  LOG_DEBUG << "[Chanle " << fd_ << "] event=." << active_events_;
+  LOG_DEBUG << "[Chanle " << fd_ << "] event=" << active_events_;
   if (active_events_ & EPOLLERR) {
     LOG_DEBUG << "Recv epoll error.event=" << active_events_;
     error_cb_();

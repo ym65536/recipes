@@ -1,4 +1,4 @@
-CXXFLAGS = -O0 -g  -Wall -I. -I.. -pthread -I./base/
+CXXFLAGS = -O0 -g  -Wall -I. -I.. -pthread -I./base/ -I./timer/
 LDFLAGS = -lpthread
 BASE_SRC = ./base/logging.cc ./base/log_stream.cc ./base/thread.cc ./base/timestamp.cc
 

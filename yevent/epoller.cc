@@ -44,7 +44,6 @@ void EPoller::Poll(ChannelList* channels, int TimeoutMs) {
 void EPoller::UpdateChannel(Channel* channel) {
   loop_->AssertInLoop(); 
   int fd = channel->Fd();
-  LOG_DEBUG << "channels size=" << channels_.size() << ",fd=" << fd;
   if (channels_.find(fd) == channels_.end()) {
     channels_[fd] = channel;
     EventAdd(channel);
@@ -57,6 +56,7 @@ void EPoller::UpdateChannel(Channel* channel) {
       EventMod(channel);
     }
   }
+  LOG_DEBUG << "channels size=" << channels_.size() << ",fd=" << fd;
 }
 
 void EPoller::EventAdd(Channel* channel) {

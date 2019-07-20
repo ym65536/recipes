@@ -22,7 +22,6 @@ struct timespec timeLeft(const Timestamp& when) {
   struct timespec ts;
   ts.tv_sec = (time_t)(ms / Timestamp::kMicroSecondsPerSecond);
   ts.tv_nsec = (ms % Timestamp::kMicroSecondsPerSecond) * 1000;
-
   return ts;
 }
 

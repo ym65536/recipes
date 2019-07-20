@@ -6,6 +6,7 @@
 #include <memory>
 #include "thread.h"
 #include "channel.h"
+#include "timer_queue.h"
 
 const static uint32_t kEPollTimeoutMs = 3000;
 
@@ -31,6 +32,10 @@ class EventLoop {
 
   void UpdateChannel(Channel* );
 
+  TimerId RunAt(const Timestamp& when, const TimerCallback& cb);
+  TimerId RunAfter(double interval, const TimerCallback& cb);
+  TimerId RunEvery(double interval, const TimerCallback& cb);
+
  private:
   int epollfd_;
   bool looping_;
@@ -38,6 +43,7 @@ class EventLoop {
   const pid_t tid_;
   std::unique_ptr<EPoller> epoller_;
   ChannelList channels_;
+  std::unique_ptr<TimerQueue> timer_queue_;
 };
 
 };

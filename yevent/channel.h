@@ -2,8 +2,8 @@
 #define YEVENT_CHANNEL_H
 
 #include <sys/epoll.h>
-#include <functional>
 #include <vector>
+#include "callbacks.h"
 
 namespace yevent {
 
@@ -14,8 +14,6 @@ enum {
   kReadEvent = EPOLLIN | EPOLLPRI,
   kWriteEvent = EPOLLOUT,
 };
-
-typedef std::function<void()> EventCallback;
 
 class Channel {
  public:
