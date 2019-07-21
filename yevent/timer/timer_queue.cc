@@ -54,13 +54,18 @@ TimerId TimerQueue::AddTimer(const TimerCallback& cb,
                              const Timestamp& when, 
                              double interval) {
   auto timer = new Timer(cb, when, interval);
+  loop_->RunInLoop(std::bind(&TimerQueue::AddTimerInLoop, this, timer));
+  LOG_DEBUG << "add timer.fd=" << timer_fd_ << ",when=" << when.toString();
+  return timer;
+}
+
+void TimerQueue::AddTimerInLoop(Timer* timer) {
+  loop_->AssertInLoop();
   bool early = InsertTimer(timer);
-  LOG_DEBUG << "add timer.fd=" << timer_fd_ << ",when=" << when.toString()
-      << ",early=" << early;
+  LOG_TRACE << "timer=" << timer << ",early=" << early;
   if (early) {
     ResetTimerFd(timer->When());
   }
-  return timer;
 }
 
 bool TimerQueue::InsertTimer(Timer* timer) {
