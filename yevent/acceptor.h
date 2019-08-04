@@ -9,9 +9,9 @@
 
 namespace yevent {
 
-typedef std::function<void(int, const InetAddress&)> NewConntionCallback;
-
 class EventLoop;
+
+typedef std::function<void(int, const InetAddress&)> NewConntionCallback;
 
 class Acceptor {
  public:
