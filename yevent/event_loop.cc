@@ -92,12 +92,16 @@ void EventLoop::RunInLoop(const Functor& cb) {
   if (IsInLoop()) {
     cb();
   } else {
-    {
-      std::lock_guard<std::mutex> lock(mtx_);
-      pending_functors_.push_back(cb);
-    }
-    WakeUp();
+    QueueInLoop(cb);
   }
+}
+
+void EventLoop::QueueInLoop(const Functor& cb) {
+  {
+    std::lock_guard<std::mutex> lock(mtx_);
+    pending_functors_.push_back(cb);
+  }
+  WakeUp();
 }
 
 void EventLoop::DoPendingFunctors() {
@@ -131,4 +135,10 @@ void EventLoop::WakeUp(void) {
   LOG_DEBUG << "write eventfd=" << wakeup_fd_ << ", counter=" << counter;
 }
 
+void EventLoop::RemoveChannel(Channel* channel) {
+  AssertInLoop();
+  assert(channel->GetLoop() == this);
+  channel->DisableAll();
+  epoller_->UpdateChannel(channel);
+}
 

@@ -31,6 +31,9 @@ class Channel {
   void SetErrorCallback(const EventCallback& cb) {
     error_cb_ = cb;
   }
+  void SetCloseCallback(const EventCallback& cb) {
+    close_cb_ = cb;
+  }
 
   int Fd() const {
     return fd_;
@@ -49,6 +52,10 @@ class Channel {
     UpdateEvents();
   }
 
+  void DisableAll() {
+    events_ = kNoneEvent;
+  }
+
   bool IsNoneEvent() const {
     return events_ == kNoneEvent;
   }
@@ -64,10 +71,12 @@ class Channel {
   int fd_;
   int events_;
   int active_events_;
+  bool event_doing_;
 
   EventCallback read_cb_;
   EventCallback write_cb_;
   EventCallback error_cb_;
+  EventCallback close_cb_;
 };
 
 typedef std::vector<Channel*> ChannelList;

@@ -64,6 +64,7 @@ void EPoller::EventAdd(Channel* channel) {
   ev.events = channel->Events();
   ev.data.ptr = channel;
   int fd = channel->Fd();
+  LOG_DEBUG << "add channel fd=" << fd;
   if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, fd, &ev) < 0) {
     LOG_SYSERR << "epoll add fail. fd=" << fd;
   }
@@ -74,6 +75,7 @@ void EPoller::EventMod(Channel* channel) {
   ev.events = channel->Events();
   ev.data.ptr = channel;
   int fd = channel->Fd();
+  LOG_DEBUG << "update channel fd=" << fd;
   if (epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, fd, &ev) < 0) {
     LOG_SYSERR << "epoll mod fail. fd=" << fd;
   }
@@ -81,6 +83,7 @@ void EPoller::EventMod(Channel* channel) {
 
 void EPoller::EventDel(Channel* channel) {
   int fd = channel->Fd();
+  LOG_DEBUG << "remove channel fd=" << fd;
   if (epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr) < 0) {
     LOG_SYSERR << "epoll del fail. fd=" << fd;
   }

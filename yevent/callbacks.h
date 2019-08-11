@@ -19,6 +19,8 @@ typedef std::function<void(const TcpConnectionPtr&)> ConnectionCallback;
 
 typedef std::function<void(const TcpConnectionPtr&, const char*, int)> MessageCallback;
 
+typedef std::function<void (const TcpConnectionPtr&)> CloseCallback;
+
 }
 
 #endif

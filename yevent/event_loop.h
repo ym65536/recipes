@@ -32,13 +32,15 @@ class EventLoop {
   void Quit();
   EventLoop* GetLoop();
 
-  void UpdateChannel(Channel* );
+  void UpdateChannel(Channel*);
+  void RemoveChannel(Channel*);
 
   TimerId RunAt(const Timestamp& when, const TimerCallback& cb);
   TimerId RunAfter(double interval, const TimerCallback& cb);
   TimerId RunEvery(double interval, const TimerCallback& cb);
 
   void RunInLoop(const Functor& cb);
+  void QueueInLoop(const Functor& cb);
 
  private:
   void DoPendingFunctors();

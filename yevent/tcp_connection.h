@@ -30,9 +30,14 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   void SetMessageCallback(const MessageCallback& cb) {
     message_cb_ = cb;
   }
+  // internal use for tcp_server/tcp_client
+  void SetCloseCallback(const CloseCallback& cb) {
+    close_cb_ = cb;
+  }
 
   void Connect();
-  void HandleRead();
+  // called when TcpServer remove this conn from its map
+  void Destroy();
 
   bool IsConnected() {
     return state_ == kConnected;
@@ -51,6 +56,10 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   void SetState(TcpState s) {
     state_ = s;
   }
+  void HandleRead();
+  void HandleWrite();
+  void HandleClose();
+  void HandleError();
 
   EventLoop*loop_;
   std::unique_ptr<Channel> channel_;
@@ -62,6 +71,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
 
   ConnectionCallback connection_cb_;
   MessageCallback message_cb_;
+  CloseCallback close_cb_;
 };
 
 };
