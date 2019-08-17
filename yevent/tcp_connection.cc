@@ -37,14 +37,14 @@ void TcpConnection::Connect() {
 }
 
 void TcpConnection::HandleRead() {
-  char buffer[65536] = {0};
-  size_t nbytes = ::read(socket_->sockfd(), buffer, sizeof buffer);
+  size_t nbytes = inbuf_.ReadFd(socket_->sockfd());
   LOG_TRACE << conn_name_ << ":read buffer size=" << nbytes;
   if (nbytes > 0) {
-    message_cb_(shared_from_this(), buffer, nbytes);
+    message_cb_(shared_from_this(), &inbuf_);
   } else if (nbytes == 0) {
     HandleClose();
   } else {
+    LOG_SYSERR << "TcpConnection:HandleRead";
     HandleError();
   }
 }

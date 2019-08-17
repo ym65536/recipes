@@ -6,6 +6,7 @@
 #include "socket.h"
 #include "channel.h"
 #include "inet_address.h"
+#include "buffer.h"
 
 namespace yevent {
 
@@ -72,6 +73,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   ConnectionCallback connection_cb_;
   MessageCallback message_cb_;
   CloseCallback close_cb_;
+  Buffer inbuf_;
 };
 
 };

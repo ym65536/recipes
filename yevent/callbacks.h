@@ -6,6 +6,7 @@
 
 namespace yevent {
 
+class Buffer;
 class TcpConnection;
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 
@@ -17,7 +18,7 @@ typedef std::function<void()> Functor;
 
 typedef std::function<void(const TcpConnectionPtr&)> ConnectionCallback;
 
-typedef std::function<void(const TcpConnectionPtr&, const char*, int)> MessageCallback;
+typedef std::function<void(const TcpConnectionPtr&, Buffer*)> MessageCallback;
 
 typedef std::function<void (const TcpConnectionPtr&)> CloseCallback;
 

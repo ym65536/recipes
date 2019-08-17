@@ -4,6 +4,7 @@
 #include "tcp_server.h"
 #include "base/thread.h"
 #include "logging.h"
+#include "buffer.h"
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/timerfd.h>
@@ -25,8 +26,10 @@ void OnConnection(const TcpConnectionPtr& conn) {
   }
 }
 
-void OnMessage(const TcpConnectionPtr& conn, const char* buf, int nbytes) {
-  LOG_DEBUG << "Recv conn=" << conn->ConnName() << ",msg=" << std::string(buf, nbytes);
+void OnMessage(const TcpConnectionPtr& conn, Buffer* buf) {
+  auto nbytes = buf->ReadableBytes();
+  LOG_DEBUG << "Recv conn=" << conn->ConnName() << ",size=" << nbytes
+      << ",data=" << buf->RetrieveAsString();
 }
 
 int main() {
