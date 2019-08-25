@@ -15,8 +15,8 @@ class EventLoop;
 enum TcpState {
   kConnecting = 0,
   kConnected = 1,
-  kDisconnected = 2,
-  kDisconnecting = 3,
+  kDisconnecting = 2,
+  kDisconnected = 3,
 };
 
 class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
@@ -40,6 +40,9 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   // called when TcpServer remove this conn from its map
   void Destroy();
 
+  void Send(const std::string& message);
+  void Shutdown();
+
   bool IsConnected() {
     return state_ == kConnected;
   }
@@ -54,6 +57,9 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   }
 
  private:
+  void SendInLoop(const std::string& message);
+  void ShutdownInLoop();
+
   void SetState(TcpState s) {
     state_ = s;
   }
@@ -74,6 +80,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   MessageCallback message_cb_;
   CloseCallback close_cb_;
   Buffer inbuf_;
+  Buffer outbuf_;
 };
 
 };

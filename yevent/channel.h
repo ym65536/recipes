@@ -52,12 +52,26 @@ class Channel {
     UpdateEvents();
   }
 
+  void EnableWriting() {
+    events_ |= kWriteEvent | EPOLLET;
+    UpdateEvents();
+  }
+
+  void DisableWriting() {
+    events_ &= ~kWriteEvent;
+    UpdateEvents();
+  }
+
   void DisableAll() {
     events_ = kNoneEvent;
   }
 
   bool IsNoneEvent() const {
     return events_ == kNoneEvent;
+  }
+
+  bool MonitorWrite() const {
+    return events_ & kWriteEvent;
   }
 
   EventLoop* GetLoop() const {

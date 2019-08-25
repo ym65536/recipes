@@ -50,12 +50,32 @@ void TcpConnection::HandleRead() {
 }
 
 void TcpConnection::HandleWrite() {
-
+  loop_->AssertInLoop();
+  LOG_TRACE << "Handle write. state_=" << state_;
+  if (!channel_->MonitorWrite())  {
+    LOG_ERROR << "Do not monitor write event.";
+    return;
+  }
+  size_t nbytes = ::write(channel_->Fd(), outbuf_.Peek(), outbuf_.ReadableBytes());
+  if (nbytes > 0) {
+    outbuf_.Retrive(n);
+    if (outbuf_.ReadableBytes() == 0) {
+      channel_->DisableWriting();
+      if (state_ == kDisconnecting) {
+        ShutdownInLoop();
+      }
+    } else {
+      LOG_INFO << "I am going to write more data...";
+    }
+  } else {
+    LOG_SYSERR << "HandleWrite";
+  }
 }
 
 void TcpConnection::HandleClose() {
   loop_->AssertInLoop();
   LOG_ERROR << "Handle close. state_=" << state_;
+  assert(state_ == kConnected || state_ == kDisconnecting);
   close_cb_(shared_from_this());
 }
 
@@ -68,9 +88,63 @@ void TcpConnection::HandleError() {
 // 生命周期最后调用函数
 void TcpConnection::Destroy() {
   loop_->AssertInLoop();
-  assert(state_ == kConnected);
+  assert(state_ == kConnected || state_ == kDisconnecting);
   SetState(kDisconnected);
   connection_cb_(shared_from_this());
   loop_->RemoveChannel(channel_.get());
 }
+
+void TcpConnectoin::Shutdown() {
+  if (state_ == kConnected) {
+    SetState(kDisconnecting);
+    loop_->RunInLoop(std::bind(&TcpConnection::ShutdownInLoop, shared_from_this()));
+  }
+}
+
+void TcpConnectoin::ShutdownInLoop() {
+  loop_->AssertInLoop();
+  if (channel_->MonitorWrite()) {
+    LOG_WARN << "In loop thread, don not shutdown.";
+    return;
+  }
+  socket_->ShutdownWrite();
+}
+
+void TcpConnection::Send(const std::string& message) {
+  if (state_ != kConnected) {
+    LOG_ERROR << "Not connect. do not send message.";
+    return;
+  }
+  if (loop_->IsInLoopThread()) {
+    SendInLoop(message);
+  } else {
+    loop_->RunInLoop(std::bind(&TcpConnection::SendInLoop, this, message));
+  }
+}
+
+void TcpConnection::SendInLoop(const std::string& message) {
+  loop_->AssertInLoop();
+  size_t nbytes = 0;
+  if (!channel_->MonitorWrite() && outbuf_.ReadableBytes() == 0) {
+    nbytes = ::write(channel_->Fd(), message.data(), message.size());
+    if (nbytes >= 0) {
+      if (nbytes < message.size()) {
+        LOG_DEBUG << "I am going to write more data...";
+      }
+    } else {
+      nbytes = 0;
+      if (errno != EAGIN) {
+        LOG_SYSERR << "TcpConnection::SendInLoop";
+      }
+    }
+  }
+
+  if (nbytes < message.size()) {
+    outbuf_.Append(message.data() + nybtes, message.size() - nbytes);
+    if (!channel_->MonitorWrite()) {
+      channel_->EnableWriting();
+    }
+  }
+}
+
 
