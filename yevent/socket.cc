@@ -3,6 +3,8 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <strings.h>  // bzero
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
 #include "logging.h"
 
 using namespace yevent;
@@ -14,6 +16,7 @@ Socket::Socket(): sockfd_(sockets::Socket()) {
 }
 
 Socket::~Socket() {
+  LOG_DEBUG << "close sockfd=" << sockfd_;
   sockets::Close(sockfd_);
 }
 
@@ -47,8 +50,13 @@ void Socket::ShutdownWrite() {
   }
 }
 
-void Socket::TcpNoDelay(bool on) {
+void Socket::SetTcpNoDelay(bool on) {
   int opt = on ? 1 : 0;
   ::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
+}
+
+void Socket::SetTcpKeepAlive(bool on) {
+  int opt = on ? 1 : 0;
+  ::setsockopt(sockfd_, IPPROTO_TCP, SO_KEEPALIVE, &opt, sizeof(opt));
 }
 

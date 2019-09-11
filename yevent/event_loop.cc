@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <sys/eventfd.h>
+#include <signal.h>
 #include "event_loop.h"
 #include "logging.h"
 #include "channel.h"
@@ -7,6 +8,13 @@
 
 using namespace std;
 using namespace yevent;
+
+class IgnoreSigPipe {
+ public:
+   IgnoreSigPipe() {
+     signal(SIGPIPE, SIG_IGN);
+   }
+};
 
 __thread EventLoop* t_this_loop = nullptr;
 
@@ -36,6 +44,7 @@ EventLoop::EventLoop(): epollfd_(-1), looping_(false), quit_(false),
 EventLoop::~EventLoop() {
 }
 
+IgnoreSigPipe init_obj;
 void EventLoop::Loop() {
   assert(looping_ == false);
   AssertInLoop();

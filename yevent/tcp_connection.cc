@@ -1,4 +1,7 @@
 #include <unistd.h>
+#include <errno.h>
+#include<sys/types.h>
+#include<sys/socket.h>
 #include "event_loop.h"
 #include "logging.h"
 #include "tcp_connection.h"
@@ -21,6 +24,8 @@ TcpConnection::TcpConnection(EventLoop* loop, const std::string& name,
   channel_->SetWriteCallback(std::bind(&TcpConnection::HandleWrite, this));
   channel_->SetCloseCallback(std::bind(&TcpConnection::HandleClose, this));
   channel_->SetErrorCallback(std::bind(&TcpConnection::HandleError, this));
+  SetTcpNoDelay(true);
+  SetTcpKeepAlive(true);
 }
 
 TcpConnection::~TcpConnection() {
@@ -58,7 +63,7 @@ void TcpConnection::HandleWrite() {
   }
   size_t nbytes = ::write(channel_->Fd(), outbuf_.Peek(), outbuf_.ReadableBytes());
   if (nbytes > 0) {
-    outbuf_.Retrive(n);
+    outbuf_.Retrieve(nbytes);
     if (outbuf_.ReadableBytes() == 0) {
       channel_->DisableWriting();
       if (state_ == kDisconnecting) {
@@ -74,7 +79,7 @@ void TcpConnection::HandleWrite() {
 
 void TcpConnection::HandleClose() {
   loop_->AssertInLoop();
-  LOG_ERROR << "Handle close. state_=" << state_;
+  LOG_ERROR << "Handle close. state=" << state_;
   assert(state_ == kConnected || state_ == kDisconnecting);
   close_cb_(shared_from_this());
 }
@@ -94,14 +99,14 @@ void TcpConnection::Destroy() {
   loop_->RemoveChannel(channel_.get());
 }
 
-void TcpConnectoin::Shutdown() {
+void TcpConnection::Shutdown() {
   if (state_ == kConnected) {
     SetState(kDisconnecting);
     loop_->RunInLoop(std::bind(&TcpConnection::ShutdownInLoop, shared_from_this()));
   }
 }
 
-void TcpConnectoin::ShutdownInLoop() {
+void TcpConnection::ShutdownInLoop() {
   loop_->AssertInLoop();
   if (channel_->MonitorWrite()) {
     LOG_WARN << "In loop thread, don not shutdown.";
@@ -115,7 +120,7 @@ void TcpConnection::Send(const std::string& message) {
     LOG_ERROR << "Not connect. do not send message.";
     return;
   }
-  if (loop_->IsInLoopThread()) {
+  if (loop_->IsInLoop()) {
     SendInLoop(message);
   } else {
     loop_->RunInLoop(std::bind(&TcpConnection::SendInLoop, this, message));
@@ -133,14 +138,14 @@ void TcpConnection::SendInLoop(const std::string& message) {
       }
     } else {
       nbytes = 0;
-      if (errno != EAGIN) {
+      if (errno != -EAGAIN) {
         LOG_SYSERR << "TcpConnection::SendInLoop";
       }
     }
   }
 
   if (nbytes < message.size()) {
-    outbuf_.Append(message.data() + nybtes, message.size() - nbytes);
+    outbuf_.Append(message.data() + nbytes, message.size() - nbytes);
     if (!channel_->MonitorWrite()) {
       channel_->EnableWriting();
     }

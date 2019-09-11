@@ -19,7 +19,8 @@ class Socket {
   int Accept(InetAddress& peeraddr);
   void ReuseAddr(bool on);
   void ShutdownWrite();
-  void TcpNoDelay(bool on);
+  void SetTcpNoDelay(bool on);
+  void SetTcpKeepAlive(bool on);
 
   int sockfd() const { return sockfd_; }
  private:

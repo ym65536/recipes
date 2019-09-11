@@ -59,6 +59,12 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
  private:
   void SendInLoop(const std::string& message);
   void ShutdownInLoop();
+  void SetTcpNoDelay(bool on) {
+    socket_->SetTcpNoDelay(true);
+  }
+  void SetTcpKeepAlive(bool on) {
+    socket_->SetTcpKeepAlive(true);
+  }
 
   void SetState(TcpState s) {
     state_ = s;
