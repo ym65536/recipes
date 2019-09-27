@@ -43,6 +43,8 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   void Send(const std::string& message);
   void Shutdown();
 
+  EventLoop* GetLoop() const { return loop_; }
+
   bool IsConnected() {
     return state_ == kConnected;
   }

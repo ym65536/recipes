@@ -10,6 +10,7 @@
 namespace yevent {
 
 class EventLoop;
+class EventLoopThreadPool;
 
 class TcpServer {
  public:
@@ -29,14 +30,19 @@ class TcpServer {
   }
 
   void Start();
+  
+  void SetThreadNum(int thread_num);
 
  private:
   void NewConnection(int sockfd, const InetAddress& peer_addr);
   void RemoveConnection(const TcpConnectionPtr& conn);
+  void RemoveConnectionInLoop(const TcpConnectionPtr& conn);
+
   typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;
 
   EventLoop*loop_;
   std::unique_ptr<Acceptor> acceptor_;
+  std::unique_ptr<EventLoopThreadPool> thread_pool_;
   std::string name_;
   ConnectionCallback connection_cb_;
   MessageCallback message_cb_;

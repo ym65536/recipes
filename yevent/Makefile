@@ -1,6 +1,6 @@
 LIB_SRC = event_loop.cc epoller.cc channel.cc timer/timer.cc timer/timer_queue.cc \
 					event_loop_thread.cc inet_address.cc socket.cc acceptor.cc \
-					tcp_connection.cc tcp_server.cc buffer.cc
+					tcp_connection.cc tcp_server.cc buffer.cc event_loop_thread_pool.cc
 
 BINARIES = test1 test2 test3 test4 test5 test6 test7 test8
 

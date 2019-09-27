@@ -38,6 +38,7 @@ int main() {
   TcpServer server(&loop, addr);
   server.SetConnectionCallback(OnConnection);
   server.SetMessageCallback(OnMessage);
+  server.SetThreadNum(2);
   server.Start();
 
   loop.Loop();
