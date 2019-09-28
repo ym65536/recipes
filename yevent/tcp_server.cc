@@ -50,7 +50,6 @@ void TcpServer::NewConnection(int sockfd, const InetAddress& peer_addr) {
   conn->SetConnectionCallback(connection_cb_);
   conn->SetMessageCallback(message_cb_);
   conn->SetCloseCallback(std::bind(&TcpServer::RemoveConnection, this, _1));
-  conn->Connect();
   io_loop->RunInLoop(std::bind(&TcpConnection::Connect, conn));
 }
 
