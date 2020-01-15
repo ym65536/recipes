@@ -20,10 +20,18 @@ TcpConnection::TcpConnection(EventLoop* loop, const std::string& name,
     state_(kConnecting) {
   LOG_DEBUG << "Tcp Connection[name=" << conn_name_ << ",fd=" << sockfd 
       << ",peer=" << peer_addr_.ToString() << " construct...";
-  channel_->SetReadCallback(std::bind(&TcpConnection::HandleRead, this));
-  channel_->SetWriteCallback(std::bind(&TcpConnection::HandleWrite, this));
-  channel_->SetCloseCallback(std::bind(&TcpConnection::HandleClose, this));
-  channel_->SetErrorCallback(std::bind(&TcpConnection::HandleError, this));
+  channel_->SetReadCallback([this]{
+    HandleRead();
+  });
+  channel_->SetWriteCallback([this]{ 
+    HandleWrite(); 
+  });
+  channel_->SetCloseCallback([this]{
+    HandleClose();
+  });
+  channel_->SetErrorCallback([this]{ 
+    HandleError();
+  });
   SetTcpNoDelay(true);
   SetTcpKeepAlive(true);
 }
@@ -102,7 +110,9 @@ void TcpConnection::Destroy() {
 void TcpConnection::Shutdown() {
   if (state_ == kConnected) {
     SetState(kDisconnecting);
-    loop_->RunInLoop(std::bind(&TcpConnection::ShutdownInLoop, shared_from_this()));
+    loop_->RunInLoop([self = shared_from_this()] {
+        self->ShutdownInLoop();
+    });
   }
 }
 
@@ -123,7 +133,9 @@ void TcpConnection::Send(const std::string& message) {
   if (loop_->IsInLoop()) {
     SendInLoop(message);
   } else {
-    loop_->RunInLoop(std::bind(&TcpConnection::SendInLoop, this, message));
+    loop_->RunInLoop([this, &message] {
+        SendInLoop(message);
+      });
   }
 }
 

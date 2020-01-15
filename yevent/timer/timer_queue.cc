@@ -21,7 +21,39 @@ TimerQueue::TimerQueue(EventLoop* loop) : loop_(loop) {
   timer_fd_ = timerfd_create(CLOCK_MONOTONIC, 0);
   assert(timer_fd_ > 0);
   chann_.reset(new Channel(loop_, timer_fd_));
-  chann_->SetReadCallback(std::bind(&TimerQueue::HandleRead, this));
+  chann_->SetReadCallback([this](){
+    LOG_DEBUG << "timer_fd=" << timer_fd_ << " handle read.";
+    loop_->AssertInLoop();
+    ReadTimerFd();
+
+    // 获取超时time
+    Timestamp now(Timestamp::now());
+    std::vector<Timer*> expired_timers;
+    auto it = timers_.upper_bound(now);
+    for (auto item = timers_.begin(); item != it; ++ item) {
+      expired_timers.push_back(item->second);
+    }
+    timers_.erase(timers_.begin(), it);
+    
+    LOG_DEBUG << "expired timers size=" << expired_timers.size();
+    for (const auto timer : expired_timers) {
+      timer->Run();
+    }
+
+    for (auto timer : expired_timers) {
+      if (timer->Repeat()) {
+        timer->Restart(now);
+        InsertTimer(timer);
+      } else {
+        delete timer;
+      }
+    }
+
+    it = timers_.begin();
+    if (it != timers_.end()) {
+      ResetTimerFd(it->first);
+    }
+  });
   chann_->EnableReading();
 }
 
@@ -54,18 +86,16 @@ TimerId TimerQueue::AddTimer(const TimerCallback& cb,
                              const Timestamp& when, 
                              double interval) {
   auto timer = new Timer(cb, when, interval);
-  loop_->RunInLoop(std::bind(&TimerQueue::AddTimerInLoop, this, timer));
+  loop_->RunInLoop([this, timer]() {
+      loop_->AssertInLoop();
+      bool early = InsertTimer(timer);
+      LOG_TRACE << "timer=" << timer << ",early=" << early;
+      if (early) {
+        ResetTimerFd(timer->When());
+      }
+    });
   LOG_DEBUG << "add timer.fd=" << timer_fd_ << ",when=" << when.toString();
   return timer;
-}
-
-void TimerQueue::AddTimerInLoop(Timer* timer) {
-  loop_->AssertInLoop();
-  bool early = InsertTimer(timer);
-  LOG_TRACE << "timer=" << timer << ",early=" << early;
-  if (early) {
-    ResetTimerFd(timer->When());
-  }
 }
 
 bool TimerQueue::InsertTimer(Timer* timer) {
@@ -81,39 +111,5 @@ bool TimerQueue::InsertTimer(Timer* timer) {
   }
   timers_.insert(std::make_pair(when, timer));
   return early;
-}
-
-void TimerQueue::HandleRead() {
-  LOG_DEBUG << "timer_fd=" << timer_fd_ << " handle read.";
-  loop_->AssertInLoop();
-  ReadTimerFd();
-
-  // 获取超时time
-  Timestamp now(Timestamp::now());
-  std::vector<Timer*> expired_timers;
-  auto it = timers_.upper_bound(now);
-  for (auto item = timers_.begin(); item != it; ++ item) {
-    expired_timers.push_back(item->second);
-  }
-  timers_.erase(timers_.begin(), it);
-  
-  LOG_DEBUG << "expired timers size=" << expired_timers.size();
-  for (const auto timer : expired_timers) {
-    timer->Run();
-  }
-
-  for (auto timer : expired_timers) {
-    if (timer->Repeat()) {
-      timer->Restart(now);
-      InsertTimer(timer);
-    } else {
-      delete timer;
-    }
-  }
-
-  it = timers_.begin();
-  if (it != timers_.end()) {
-    ResetTimerFd(it->first);
-  }
 }
 

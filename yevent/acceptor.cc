@@ -11,7 +11,9 @@ Acceptor::Acceptor(EventLoop* loop, const InetAddress& addr) :
     listenning_(false) {
   sock_.ReuseAddr(true);
   sock_.Bind(addr);
-  channel_.SetReadCallback(std::bind(&Acceptor::HandleRead, this));
+  channel_.SetReadCallback([this]{
+    HandleRead();
+  });
 }
 
 Acceptor::~Acceptor() {

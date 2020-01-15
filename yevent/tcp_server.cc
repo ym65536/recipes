@@ -16,7 +16,8 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& addr) :
     started_(false),
     conn_id_(0) {
   acceptor_->SetNewConnectionCallback(
-      std::bind(&TcpServer::NewConnection, this, _1, _2));
+      [this](int sockfd, const InetAddress& peer_addr) {
+        NewConnection(sockfd, peer_addr); });
   LOG_DEBUG << name_ << " tcp server construct..."; 
 }
 
@@ -49,12 +50,14 @@ void TcpServer::NewConnection(int sockfd, const InetAddress& peer_addr) {
   connections_[conn_name] = conn;
   conn->SetConnectionCallback(connection_cb_);
   conn->SetMessageCallback(message_cb_);
-  conn->SetCloseCallback(std::bind(&TcpServer::RemoveConnection, this, _1));
-  io_loop->RunInLoop(std::bind(&TcpConnection::Connect, conn));
+  conn->SetCloseCallback([this] (const TcpConnectionPtr& conn) {
+    RemoveConnection(conn);
+  });
+  io_loop->RunInLoop([conn] { conn->Connect(); });
 }
 
 void TcpServer::RemoveConnection(const TcpConnectionPtr& conn) {
-  loop_->RunInLoop(std::bind(&TcpServer::RemoveConnectionInLoop, this, conn));
+  loop_->RunInLoop([this, conn]{ RemoveConnectionInLoop(conn); });
 }
 
 void TcpServer::RemoveConnectionInLoop(const TcpConnectionPtr& conn) {
@@ -62,6 +65,6 @@ void TcpServer::RemoveConnectionInLoop(const TcpConnectionPtr& conn) {
   LOG_DEBUG << "TcpServer remove conn=" << conn->ConnName();
   connections_.erase(conn->ConnName());
   EventLoop* io_loop = conn->GetLoop();
-  io_loop->QueueInLoop(std::bind(&TcpConnection::Destroy, conn));
+  io_loop->QueueInLoop([conn] { conn->Destroy(); });
 }
 

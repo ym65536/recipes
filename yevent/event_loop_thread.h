@@ -17,8 +17,6 @@ class EventLoopThread {
   EventLoop* StartLoop();
 
  private:
-  void ThreadFunc();
-
   EventLoop* loop_;
   Thread thread_;
   std::mutex mtx_;

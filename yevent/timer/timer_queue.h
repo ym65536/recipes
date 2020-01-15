@@ -26,9 +26,6 @@ class TimerQueue {
 
   void ResetTimerFd(const Timestamp& when);
   uint64_t ReadTimerFd();
-
-  void AddTimerInLoop(Timer* timer);
-  void HandleRead();
   bool InsertTimer(Timer*);
 
   EventLoop* loop_;

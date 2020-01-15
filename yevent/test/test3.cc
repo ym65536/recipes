@@ -10,17 +10,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-
 using namespace yevent;
 
 EventLoop* g_loop = nullptr;
-
-void Timeout()
-{
-  printf("threadFunc(): pid = %d, tid = %d\n",
-         getpid(), yevent::CurrentThread::tid());
-  g_loop->Quit();
-}
 
 int main()
 {
@@ -30,7 +22,10 @@ int main()
   int timerfd = timerfd_create(CLOCK_REALTIME, O_NONBLOCK | O_CLOEXEC);
   assert(timerfd > 0);
   Channel channel(g_loop, timerfd);
-  channel.SetReadCallback(Timeout);
+  channel.SetReadCallback([] {
+    printf("threadFunc(): pid = %d, tid = %d\n",
+         getpid(), yevent::CurrentThread::tid());
+    g_loop->Quit(); });
   channel.EnableReading();
 
   struct itimerspec ts;

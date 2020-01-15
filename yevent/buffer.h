@@ -77,6 +77,10 @@ class Buffer {
     return str;
   }
 
+  std::string ToString() {
+    return std::string(Peek(), ReadableBytes());
+  }
+
   void Append(const std::string& str) {
     Append(str.data(), str.length());
   }

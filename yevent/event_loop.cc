@@ -37,7 +37,9 @@ EventLoop::EventLoop(): epollfd_(-1), looping_(false), quit_(false),
   t_this_loop = this;
   LOG_TRACE << "EventLoop=" << t_this_loop << " create in thread=" << tid_
       << ",epoll fd=" << epollfd_;
-  wakeup_channel_->SetReadCallback(std::bind(&EventLoop::HandleRead, this));
+  wakeup_channel_->SetReadCallback([this]{
+    HandleRead();
+  });
   wakeup_channel_->EnableReading();
 } 
 

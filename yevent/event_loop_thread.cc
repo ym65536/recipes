@@ -6,7 +6,14 @@ using namespace yevent;
 
 EventLoopThread::EventLoopThread() : 
   loop_(nullptr),
-  thread_(std::bind(&EventLoopThread::ThreadFunc, this)) {
+  thread_([this]() {
+    EventLoop loop;
+    {
+      std::lock_guard<std::mutex> lock(mtx_);
+      loop_ = &loop;
+      cv_.notify_all();
+    }
+    loop_->Loop(); }) {
 }
 
 EventLoopThread::~EventLoopThread() {
@@ -23,15 +30,5 @@ EventLoop* EventLoopThread::StartLoop() {
     }
   }
   return loop_;
-}
-
-void EventLoopThread::ThreadFunc() {
-  EventLoop loop;
-  {
-    std::lock_guard<std::mutex> lock(mtx_);
-    loop_ = &loop;
-    cv_.notify_all();
-  }
-  loop_->Loop();
 }
 
